@@ -25,6 +25,7 @@ class StrAdapter(BaseAdapter):
 class FunctionAdapter(BaseAdapter):
 
     def adapter_fn(self, value):
+        print(value)
         value_lines = [""] + inspect.getsourcelines(value)[0]
         for line_num, line in enumerate(value_lines):
             if line_num == 1:
