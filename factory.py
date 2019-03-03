@@ -1,6 +1,4 @@
 import inspect
-import os
-from threading import Timer
 import adapters
 
 
