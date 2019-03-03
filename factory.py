@@ -7,7 +7,56 @@ def type_str(value):
     return type(value).__name__
 
 
+class Entity:
+
+    ENTITY_CLASS = 0
+    ENTITY_METHOD = 1
+    ENTITY_PROPERTY = 2
+
+    def __init__(self, entity_type, name, source):
+        entity_type = int(entity_type)
+        if entity_type < self.ENTITY_CLASS or entity_type > self.ENTITY_PROPERTY:
+            raise ValueError("entity type must be either "
+                             "Entity.ENTITY_CLASS, Entity.ENTITY_METHOD or Entity.ENTITY_PROPERTY")
+        self.type = entity_type
+        # TODO Name check
+        self.name = str(name)
+        self.source = source
+
+    def get_code(self):
+        raise NotImplementedError()
+
+
+class Class(Entity):
+
+    def __init__(self, name, source):
+        super(Class, self).__init__(super().ENTITY_CLASS, name, source)
+
+    def get_code(self):
+        return ""
+
+
+class Method(Entity):
+
+    def __init__(self, name, source):
+        super(Method, self).__init__(super().ENTITY_METHOD, name, source)
+
+    def get_code(self):
+        return ""
+
+
+class Property(Entity):
+
+    def __init__(self, name, source):
+        super(Property, self).__init__(super().ENTITY_PROPERTY, name, source)
+
+    def get_code(self):
+        return ""
+
+
 class Factory:
+
+
 
     FILE_PATH = "{}.py"
 
