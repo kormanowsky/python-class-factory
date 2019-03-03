@@ -34,12 +34,16 @@ class Entity:
     def __init__(self, entity_type, name, source):
         entity_type = int(entity_type)
         if entity_type < self.ENTITY_CLASS or entity_type > self.ENTITY_PROPERTY:
-            raise ValueError("entity type must be either "
+            raise ValueError("Entity type must be either "
                              "Entity.ENTITY_CLASS, Entity.ENTITY_METHOD or Entity.ENTITY_PROPERTY")
         self.type = entity_type
-        # TODO Name check
+        if not self.check_name(name):
+            raise ValueError("Entity name is not valid.")
         self.name = str(name)
         self.source = source
+
+    def check_name(self):
+        raise NotImplementedError()
 
     def get_code(self):
         raise NotImplementedError()
@@ -49,6 +53,10 @@ class Class(Entity):
 
     def __init__(self, name, source):
         super(Class, self).__init__(super().ENTITY_CLASS, name, source)
+
+    def check_name(self):
+        # Todo
+        return True
 
     def get_code(self):
         return ""
@@ -61,6 +69,10 @@ class Method(Entity):
     def __init__(self, name, source):
         super(Method, self).__init__(super().ENTITY_METHOD, name, source)
 
+    def check_name(self):
+        # Todo
+        return True
+
     def get_code(self):
         return ""
 
@@ -68,7 +80,14 @@ class Method(Entity):
 class Property(Entity):
 
     def __init__(self, name, source):
+        if callable(source):
+            raise ValueError("Source for Property is callable. Use Method for that source instead.")
+
         super(Property, self).__init__(super().ENTITY_PROPERTY, name, source)
+
+    def check_name(self):
+        # Todo
+        return True
 
     def get_code(self):
         return ""
