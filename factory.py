@@ -7,6 +7,24 @@ def type_str(value):
     return type(value).__name__
 
 
+class AdapterManager:
+
+    def __init__(self):
+        self.adapters = {
+            "str": adapters.StrAdapter(),
+            "function": adapters.FunctionAdapter(),
+        }
+
+    def add_adapter(self, value_type, adapter):
+        self.adapters[value_type] = adapter
+
+    def get_appropriate_adapter(self, value):
+        t = type_str(value)
+        adapter = adapters.BaseAdapter()
+        if t in self.adapters:
+            adapter = self.adapters[t]
+        return adapter
+
 class Entity:
 
     ENTITY_CLASS = 0
@@ -38,6 +56,8 @@ class Class(Entity):
 
 class Method(Entity):
 
+    METHOD_NAME_PLACEHOLDER = "__name_placeholder__"
+
     def __init__(self, name, source):
         super(Method, self).__init__(super().ENTITY_METHOD, name, source)
 
@@ -56,14 +76,9 @@ class Property(Entity):
 
 class Factory:
 
-
-
     FILE_PATH = "{}.py"
 
-    adapters = {
-        "str": adapters.StrAdapter(),
-        "function": adapters.FunctionAdapter(),
-    }
+
 
     # Sets new class name
     def __init__(self, name):
@@ -75,9 +90,7 @@ class Factory:
 
     def add_member(self, name, value):
         t = type_str(value)
-        adapter = adapters.BaseAdapter()
-        if t in Factory.adapters:
-            adapter = Factory.adapters[t]
+
         adapted = adapter.adapt(name, value)
         if adapter.__class__ == adapters.FunctionAdapter:
             self.methods[name] = adapted
