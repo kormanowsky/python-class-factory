@@ -1,7 +1,9 @@
-import adapters
+import inspect, adapters
 
 
 def type_str(value):
+    if inspect.isclass(value):
+        return "class"
     if callable(value):
         return "function"
     return type(value).__name__
@@ -40,9 +42,14 @@ class Entity:
         if not self.check_name(name):
             raise ValueError("Entity name is not valid.")
         self.name = str(name)
+        if not self.check_source(source):
+            raise ValueError("Entity source is not valid.")
         self.source = source
 
-    def check_name(self):
+    def check_name(self, name):
+        raise NotImplementedError()
+
+    def check_source(self, source):
         raise NotImplementedError()
 
     def get_code(self):
@@ -54,9 +61,12 @@ class Class(Entity):
     def __init__(self, name, source):
         super(Class, self).__init__(super().ENTITY_CLASS, name, source)
 
-    def check_name(self):
+    def check_name(self, name):
         # Todo
         return True
+
+    def check_source(self, source):
+        return type_str(source) == "class"
 
     def get_code(self):
         return ""
@@ -69,9 +79,12 @@ class Method(Entity):
     def __init__(self, name, source):
         super(Method, self).__init__(super().ENTITY_METHOD, name, source)
 
-    def check_name(self):
+    def check_name(self, name):
         # Todo
         return True
+
+    def check_source(self, source):
+        return type_str(source) == "function"
 
     def get_code(self):
         return ""
@@ -85,9 +98,12 @@ class Property(Entity):
 
         super(Property, self).__init__(super().ENTITY_PROPERTY, name, source)
 
-    def check_name(self):
+    def check_name(self, name):
         # Todo
         return True
+
+    def check_source(self, source):
+        return not type_str(source) in ["class", "function"]
 
     def get_code(self):
         return ""
