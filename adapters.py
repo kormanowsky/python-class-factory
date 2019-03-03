@@ -1,27 +1,33 @@
-from factory import type_str
-
+import inspect
 
 class BaseAdapter:
 
-    def __init__(self, adapter_type):
-        self.adapter_type = adapter_type
+    def __init__(self):
+        pass
 
     # This must be overridden in child classes
-    def adapter_fn(self, value):
-        return str(value)
+    def adapter_fn(self, name, value):
+        return "{} = {}".format(str(name), str(value))
 
-    def adapt(self, value):
-        if not type_str(value) == self.adapter_type:
-            raise ValueError("value must be a {} object".format(self.adapter_type))
-        return self.adapter_fn(value)
+    def adapt(self, name, value):
+        return self.adapter_fn(name, value)
 
 
 class StrAdapter(BaseAdapter):
 
-    def __init__(self):
-        super(StrAdapter, self).__init__('str')
+    def adapter_fn(self, name, value):
+        value = value.replace('"', '\\"')
+        value = "\"{}\"".format(value)
+        return "{} = {}".format(str(name), str(value))
 
-    def adapter_fn(self, value):
-        print(value)
-        return ""
 
+class FunctionAdapter(BaseAdapter):
+
+    def adapter_fn(self, name, value):
+        value_lines = [""] + inspect.getsourcelines(value)[0]
+        for line_num, line in enumerate(value_lines):
+            if line_num == 1:
+                line = line.replace(line.split(" ")[1].split("(")[0], name)
+            line = line.replace("\n", "")
+            value_lines[line_num] = line
+        return "\n".join(value_lines)
