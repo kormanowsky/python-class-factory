@@ -10,8 +10,14 @@ class BaseAdapter:
     def adapter_fn(self, value):
         return str(value)
 
+    def name_getter_fn(self, value):
+        raise NotImplementedError()
+
     def adapt(self, value):
         return self.adapter_fn(value)
+
+    def get_name(self, value):
+        return self.name_getter_fn(value)
 
 
 class StrAdapter(BaseAdapter):
@@ -25,11 +31,27 @@ class StrAdapter(BaseAdapter):
 class FunctionAdapter(BaseAdapter):
 
     def adapter_fn(self, value):
-        print(value)
-        value_lines = [""] + inspect.getsourcelines(value)[0]
+        value_lines = inspect.getsourcelines(value)[0]
+        indent = 0
         for line_num, line in enumerate(value_lines):
-            if line_num == 1:
-                line = line.replace(line.split(" ")[1].split("(")[0], "__name_placeholder__")
+            if line_num == 0:
+                indent = line.index("def")
+                line = line.replace(line.split("def ")[1].split("(")[0], "__name_placeholder__")
+            line = line[indent:]
             line = line.replace("\n", "")
             value_lines[line_num] = line
         return "\n".join(value_lines)
+
+    def name_getter_fn(self, value):
+        value_lines = inspect.getsourcelines(value)[0]
+        return value_lines[0].split("def ")[1].split("(")[0]
+
+
+class ClassAdapter(BaseAdapter):
+
+    def adapter_fn(self, value):
+        raise NotImplementedError()
+
+    def name_getter_fn(self, value):
+        value_lines = inspect.getsourcelines(value)[0]
+        return value_lines[0].split("class ")[1].split(":")[0]
