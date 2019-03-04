@@ -139,6 +139,7 @@ class Class(Entity):
 class Method(Entity):
 
     METHOD_NAME_PLACEHOLDER = "__name_placeholder__"
+    METHOD_STATIC_DECORATOR = "@classmethod"
 
     def __init__(self, source, name=None, static=False):
         super(Method, self).__init__(Method, source, name)
@@ -154,10 +155,9 @@ class Method(Entity):
         return type_str(source) == "function"
 
     def get_code(self):
+        code = []
         if self.static:
-            code = ["@classmethod"]
-        else:
-            code = []
+            code.append(self.METHOD_STATIC_DECORATOR)
         code += self.adapter.adapt(self.source).replace(self.METHOD_NAME_PLACEHOLDER, self.name).split("\n")
         return code
 
