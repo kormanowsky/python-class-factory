@@ -9,6 +9,12 @@ class Factory:
     Property = entities.Property
 
     @classmethod
+    def create(cls, __classname__, **kwargs):
+        entity = cls.Class(name=__classname__)
+        for key in kwargs:
+            entity.add_member(kwargs[key], key)
+
+    @classmethod
     def produce(cls, classobject, loc=None, magicmethods=True):
         file_name = Factory.FILE_PATH.format(classobject.name)
         with open(file_name, "w+") as produce_file:
@@ -20,14 +26,6 @@ class Factory:
             return generated_class
         loc[classobject.name] = generated_class
         return loc
-
-    def _add_members(self, obj, properties, methods, classes):
-        for property in properties:
-            obj.add_property(properties[property], property)
-        for method in methods:
-            obj.add_method(methods[method], method)
-        for c in classes:
-            obj.add_class(classes[c], c)
 
     @classmethod
     def produce_fast(cls, entity_type, name, properties, methods, classes, loc=None, magicmethods=True):
