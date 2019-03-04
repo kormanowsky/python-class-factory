@@ -1,32 +1,9 @@
-import inspect, adapters
+from factory.adapters import AdapterManager
+from factory.functions import *
 
 
-def type_str(value):
-    if inspect.isclass(value):
-        return "class"
-    if callable(value):
-        return "function"
-    return type(value).__name__
-
-
-class AdapterManager:
-
-    def __init__(self):
-        self.adapters = {
-            "str": adapters.StrAdapter(),
-            "function": adapters.FunctionAdapter(),
-            "class": adapters.ClassAdapter(),
-        }
-
-    def add_adapter(self, value_type, adapter):
-        self.adapters[value_type] = adapter
-
-    def get_appropriate_adapter(self, value):
-        t = type_str(value)
-        adapter = adapters.BaseAdapter()
-        if t in self.adapters:
-            adapter = self.adapters[t]
-        return adapter
+class Empty:
+    pass
 
 
 class Entity:
@@ -50,10 +27,6 @@ class Entity:
         raise NotImplementedError()
 
 
-class EmptyClass:
-    pass
-
-
 class Class(Entity):
 
     def __init__(self, name, source):
@@ -61,7 +34,7 @@ class Class(Entity):
         self.classes = []
         self.methods = []
         self.properties = []
-        if source != EmptyClass:
+        if source != Empty:
             for t in [Class, Method, Property]:
                 members = inspect.getmembers(source, t.check_source)
                 for member in members:
@@ -167,21 +140,3 @@ class Property(Entity):
 
     def get_code(self):
         return "{} = {}".format(self.name, self.adapter.adapt(self.source))
-
-
-class Factory:
-
-    FILE_PATH = "{}.py"
-
-    @classmethod
-    def produce(cls, classobject, loc=None, magicmethods=True):
-        file_name = Factory.FILE_PATH.format(classobject.name)
-        with open(file_name, "w+") as produce_file:
-            for string in classobject.get_code():
-                produce_file.write("{}\n".format(string))
-        mod = __import__(classobject.name, fromlist=[classobject.name])
-        generated_class = getattr(mod, classobject.name)
-        if loc is None:
-            return generated_class
-        loc[classobject.name] = generated_class
-        return loc

@@ -1,4 +1,4 @@
-import inspect
+from factory.functions import *
 
 
 class BaseAdapter:
@@ -18,6 +18,26 @@ class BaseAdapter:
 
     def get_name(self, value):
         return self.name_getter_fn(value)
+
+
+class AdapterManager:
+
+    def __init__(self):
+        self.adapters = {
+            "str": StrAdapter(),
+            "function": FunctionAdapter(),
+            "class": ClassAdapter(),
+        }
+
+    def add_adapter(self, value_type, adapter):
+        self.adapters[value_type] = adapter
+
+    def get_appropriate_adapter(self, value):
+        t = type_str(value)
+        adapter = BaseAdapter()
+        if t in self.adapters:
+            adapter = self.adapters[t]
+        return adapter
 
 
 class StrAdapter(BaseAdapter):
