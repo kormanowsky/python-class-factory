@@ -30,9 +30,9 @@ class Class(Entity):
 
     def __init__(self, source=Empty, name=None):
         super(Class, self).__init__(Class, source, name)
-        self.classes = []
-        self.methods = []
-        self.properties = []
+        self.classes = {}
+        self.methods = {}
+        self.properties = {}
         if source != Empty:
             for t in [Class, Method, Property]:
                 members = inspect.getmembers(source, t.check_source)
@@ -61,13 +61,49 @@ class Class(Entity):
             self.add_property(source, name)
 
     def add_class(self, source=Empty, name=None):
-        self.classes.append(Class(source, name))
+        if name in self.classes:
+            raise ValueError("{} is already in class {}".format(name, self.name))
+        self.classes[name] = Class(source, name)
 
     def add_method(self, source, name=None):
-        self.methods.append(Method(source, name))
+        if name in self.methods:
+            raise ValueError("{} is already in class {}".format(name, self.name))
+        self.methods[name] = Method(source, name)
 
     def add_property(self, source, name):
-        self.properties.append(Property(source, name))
+        if name in self.properties:
+            raise ValueError("{} is already in class {}".format(name, self.name))
+        self.properties[name] = Property(source, name)
+
+    def set_class(self, source=Empty, name=None):
+        if name not in self.classes:
+            raise ValueError("{} is not in class {}".format(name, self.name))
+        self.classes[name] = Class(source, name)
+
+    def set_method(self, source=Empty, name=None):
+        if name not in self.methods:
+            raise ValueError("{} is not in class {}".format(name, self.name))
+        self.methods[name] = Method(source, name)
+
+    def set_property(self, source=Empty, name=None):
+        if name not in self.properties:
+            raise ValueError("{} is not in class {}".format(name, self.name))
+        self.properties[name] = Property(source, name)
+
+    def del_class(self, name):
+        if name not in self.classes:
+            raise ValueError("{} is not in class {}".format(name, self.name))
+        del self.classes[name]
+
+    def del_method(self, name):
+        if name not in self.methods:
+            raise ValueError("{} is not in class {}".format(name, self.name))
+        del self.methods[name]
+
+    def del_property(self, name):
+        if name not in self.properties:
+            raise ValueError("{} is not in class {}".format(name, self.name))
+        del self.properties[name]
 
     def get_code(self):
         strings = [
