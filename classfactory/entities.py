@@ -140,8 +140,9 @@ class Method(Entity):
 
     METHOD_NAME_PLACEHOLDER = "__name_placeholder__"
 
-    def __init__(self, source, name=None):
+    def __init__(self, source, name=None, static=False):
         super(Method, self).__init__(Method, source, name)
+        self.static = bool(static)
 
     @classmethod
     def check_name(self, name):
@@ -153,7 +154,12 @@ class Method(Entity):
         return type_str(source) == "function"
 
     def get_code(self):
-        return self.adapter.adapt(self.source).replace(self.METHOD_NAME_PLACEHOLDER, self.name).split("\n")
+        if self.static:
+            code = ["@classmethod"]
+        else:
+            code = []
+        code += self.adapter.adapt(self.source).replace(self.METHOD_NAME_PLACEHOLDER, self.name).split("\n")
+        return code
 
 
 class Property(Entity):

@@ -39,7 +39,7 @@ class Factory:
     @classmethod
     def __addtoclass(cls, source, name=None, type=Method):
         class_to_add = inspect.stack()[1][0].f_locals['self']
-        if class_to_add.__name__ not in self.classes:
+        if class_to_add.__name__ not in cls.classes:
             raise ValueError("We cannot alter that class. "
                              "You must create class using Factory.generate() and then alter it.")
         entity = cls.__entity(class_to_add)
