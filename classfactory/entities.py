@@ -1,5 +1,5 @@
-from factory.adapters import AdapterManager
-from factory.functions import *
+from classfactory.adapters import AdapterManager
+from classfactory.functions import *
 
 
 class Empty:
@@ -8,20 +8,19 @@ class Empty:
 
 class Entity:
 
-    def __init__(self, entity_class, name, source):
+    def __init__(self, entity_class, source, name=None):
+        self.adapter = AdapterManager().get_appropriate_adapter(source)
         if entity_class not in [Class, Method, Property]:
             raise ValueError("Entity class must be either "
                              "Class, Method or Property")
-        if not self.check_name(name):
+        if name is None:
+            name = self.adapter.get_name(source)
+        if not entity_class.check_name(name):
             raise ValueError("Entity name is not valid.")
         self.name = str(name)
         if not entity_class.check_source(source):
             raise ValueError("Entity source is not valid.")
         self.source = source
-        self.adapter = AdapterManager().get_appropriate_adapter(source)
-
-    def check_name(self, name):
-        raise NotImplementedError()
 
     def get_code(self):
         raise NotImplementedError()
@@ -29,8 +28,8 @@ class Entity:
 
 class Class(Entity):
 
-    def __init__(self, name, source):
-        super(Class, self).__init__(Class, name, source)
+    def __init__(self, source=Empty, name=None):
+        super(Class, self).__init__(Class, source, name)
         self.classes = []
         self.methods = []
         self.properties = []
@@ -39,8 +38,9 @@ class Class(Entity):
                 members = inspect.getmembers(source, t.check_source)
                 for member in members:
                     mem_name, mem_source = member
-                    self.add_member(t, mem_name, mem_source)
+                    self.add_member(mem_name, mem_source)
 
+    @classmethod
     def check_name(self, name):
         # Todo
         return True
@@ -49,28 +49,25 @@ class Class(Entity):
     def check_source(cls, source):
         return type_str(source) == "class"
 
-    def add_member(self, member_class, name, source):
+    def add_member(self, source, name=None):
         # Do not add __MEMBER__ methods and mro method
-        if name[:2] == "__" or name == "mro":
+        if type_str(name) == "str" and (name[:2] == "__" or name == "mro"):
             return
-        obj = member_class(name, source)
-        if member_class == Class:
-            self.classes.append(obj)
-        elif member_class == Method:
-            self.methods.append(obj)
-        elif member_class == Property:
-            self.properties.append(obj)
+        if Class.check_source(source):
+            self.add_class(source, name)
+        elif Method.check_source(source):
+            self.add_method(source, name)
         else:
-            raise ValueError("Incorrect member_class for Class.add_member")
+            self.add_property(source, name)
 
-    def add_class(self, name, source):
-        self.add_member(Class, name, source)
+    def add_class(self, source=Empty, name=None):
+        self.classes.append(Class(source, name))
 
-    def add_method(self, name, source):
-        self.add_member(Method, name, source)
+    def add_method(self, source, name=None):
+        self.methods.append(Method(source, name))
 
-    def add_property(self, name, source):
-        self.add_member(Property, name, source)
+    def add_property(self, source, name):
+        self.properties.append(Property(source, name))
 
     def get_code(self):
         strings = [
@@ -107,9 +104,10 @@ class Method(Entity):
 
     METHOD_NAME_PLACEHOLDER = "__name_placeholder__"
 
-    def __init__(self, name, source):
-        super(Method, self).__init__(Method, name, source)
+    def __init__(self, source, name=None):
+        super(Method, self).__init__(Method, source, name)
 
+    @classmethod
     def check_name(self, name):
         # Todo
         return True
@@ -124,12 +122,13 @@ class Method(Entity):
 
 class Property(Entity):
 
-    def __init__(self, name, source):
+    def __init__(self, source, name):
         if callable(source):
             raise ValueError("Source for Property is callable. Use Method for that source instead.")
 
-        super(Property, self).__init__(Property, name, source)
+        super(Property, self).__init__(Property, source, name)
 
+    @classmethod
     def check_name(self, name):
         # Todo
         return True

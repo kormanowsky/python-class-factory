@@ -1,4 +1,4 @@
-from factory.functions import *
+from classfactory.functions import *
 
 
 class BaseAdapter:
