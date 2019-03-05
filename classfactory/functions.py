@@ -1,3 +1,6 @@
+##############################
+# ClassFactory functions file
+##############################
 import inspect
 
 

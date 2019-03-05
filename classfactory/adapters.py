@@ -1,3 +1,8 @@
+##############################
+# ClassFactory adapters file
+# You may add your own adapter by calling AdapterManager.add_adapter(class_name, adapter_class)
+##############################
+
 from classfactory.functions import *
 
 
