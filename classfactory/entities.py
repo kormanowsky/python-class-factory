@@ -45,6 +45,7 @@ class Class(Entity):
                 for member in members:
                     mem_name, mem_source = member
                     self.add_member(mem_source, mem_name)
+        self.save()
 
     @classmethod
     def check_name(self, name):
