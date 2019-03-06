@@ -5,7 +5,7 @@
 from classfactory.adapters import AdapterManager
 from classfactory.functions import *
 from classfactory.config import *
-
+from importlib import reload
 
 class Empty:
     pass
@@ -147,6 +147,7 @@ class Class(Entity):
             for string in self.get_code():
                 produce_file.write("{}\n".format(string))
         mod = __import__(self.name, fromlist=[self.name])
+        reload(mod)
         generated_class = getattr(mod, self.name)
         stack = inspect.stack()
         if self.name in stack[1][0].f_globals:
